@@ -12,9 +12,19 @@ members = ["domain", "handler", "infrastructure", "usecase"]
 
 
 [workspace.dependencies]
+handler = { path = "handler" }
+domain = { path = "domain" }
+infrastructure = { path = "infrastructure" }
+usecase = { path = "usecase" }
+
 anyhow = "1.0.102"
 axum = "0.8.8"
+thiserror = "2.0.18"
 tokio = { version = "1.50.0", features = ["macros", "rt-multi-thread"] }
+rstest = "0.26.1"
+uuid = { version = "1.22.0", features = ["v7"] }
+derive_more = { version = "2.1.1", features = ["from", "into"] }
+email_address = "0.2.9"
 
 [dependencies]
 handler.workspace = true
