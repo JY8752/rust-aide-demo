@@ -1894,6 +1894,11 @@ dependencies = [
 [[package]]
 name = "usecase"
 version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "domain",
+ "thiserror",
+]
 
 [[package]]
 name = "utf8_iter"

@@ -1,9 +1,8 @@
-pub mod error;
 pub mod repository;
 
+use crate::error::Error;
 use derive_more::{From, Into};
 use email_address::EmailAddress;
-use error::Error;
 use uuid::Uuid;
 
 #[derive(Clone, From, Debug, Into)]
