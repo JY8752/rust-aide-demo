@@ -1,0 +1,59 @@
+[config]
+default_to_workspace = false
+
+[tasks.fmt]
+command = "cargo"
+args = ["fmt", "--all"]
+
+[tasks.fmt-check]
+command = "cargo"
+args = ["fmt", "--all", "--", "--check"]
+
+[tasks.check]
+command = "cargo"
+args = ["check", "--workspace"]
+
+[tasks.clippy]
+command = "cargo"
+args = ["clippy", "--workspace", "--all-targets", "--", "-D", "warnings"]
+
+[tasks.test]
+command = "cargo"
+args = ["test", "--workspace"]
+
+[tasks.ci]
+dependencies = ["fmt-check", "check", "clippy", "test"]
+
+[tasks.run]
+command = "cargo"
+args = ["run", "--bin", "app"]
+
+########################################################
+# Docker
+########################################################
+
+[tasks.up]
+command = "docker"
+args = ["compose", "up", "-d"]
+
+[tasks.down]
+command = "docker"
+args = ["compose", "down"]
+
+[tasks.connect]
+command = "docker"
+args = ["compose", "exec", "postgres", "psql", "-U", "postgres", "-d", "app"]
+
+########################################################
+# Atlas
+########################################################
+
+[tasks.migrate-apply]
+description = "DBスキーマをローカルのDBに適用する。"
+command = "atlas"
+args = ["schema", "apply", "--env", "local"]
+
+[tasks.migrate-diff]
+description = "DBスキーマの差分からマイグレーションファイルを作成する。"
+command = "atlas"
+args = ["migrate", "diff", "${@}", "--env", "local"]

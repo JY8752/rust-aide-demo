@@ -1,11 +1,12 @@
 pub mod error;
+pub mod repository;
 
 use derive_more::{From, Into};
 use email_address::EmailAddress;
 use error::Error;
 use uuid::Uuid;
 
-#[derive(From, Debug, Into)]
+#[derive(Clone, From, Debug, Into)]
 pub struct UserId(Uuid);
 
 impl UserId {
@@ -17,7 +18,7 @@ impl UserId {
     }
 }
 
-#[derive(Debug, From, Into)]
+#[derive(Clone, Debug, From, Into)]
 pub struct UserName(String);
 
 impl UserName {
@@ -35,7 +36,7 @@ impl UserName {
     }
 }
 
-#[derive(From, Debug, Into)]
+#[derive(Clone, From, Debug, Into)]
 pub struct UserEmail(String);
 
 impl UserEmail {
@@ -64,6 +65,26 @@ impl User {
             name: UserName::new(name)?,
             email: UserEmail::new(email)?,
         })
+    }
+
+    pub fn reconstruct(id: Uuid, name: String, email: String) -> Self {
+        Self {
+            id: UserId(id),
+            name: UserName(name),
+            email: UserEmail(email),
+        }
+    }
+
+    pub fn id(&self) -> &UserId {
+        &self.id
+    }
+
+    pub fn name(&self) -> &UserName {
+        &self.name
+    }
+
+    pub fn email(&self) -> &UserEmail {
+        &self.email
     }
 }
 
