@@ -4,3 +4,10 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+app_state.workspace = true
+axum.workspace = true
+domain.workspace = true
+usecase.workspace = true
+uuid.workspace = true
+serde.workspace = true
+tracing.workspace = true

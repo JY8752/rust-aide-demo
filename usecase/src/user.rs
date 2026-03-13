@@ -1,25 +1,20 @@
 use anyhow::Context;
 use domain::user::{User, UserId, repository::UserRepository};
+use std::sync::Arc;
 
 use crate::error::ApplicationError;
 
-pub struct UserUseCase<R>
-where
-    R: UserRepository,
-{
-    repository: R,
+pub struct UserUseCase {
+    repository: Arc<dyn UserRepository + Send + Sync>,
 }
 
-impl<R> UserUseCase<R>
-where
-    R: UserRepository,
-{
-    pub fn new(repository: R) -> Self {
+impl UserUseCase {
+    pub fn new(repository: Arc<dyn UserRepository + Send + Sync>) -> Self {
         Self { repository }
     }
 
     pub async fn create_user(&self, name: &str, email: &str) -> Result<User, ApplicationError> {
-        let user = User::new(name, email).map_err(anyhow::Error::from)?;
+        let user = User::new(name, email)?;
 
         self.repository
             .save(&user)

@@ -25,8 +25,9 @@ args = ["test", "--workspace"]
 dependencies = ["fmt-check", "check", "clippy", "test"]
 
 [tasks.run]
+install_crate = "cargo-watch"
 command = "cargo"
-args = ["run", "--bin", "app"]
+args = ["watch", "-x", "run --bin app"]
 
 ########################################################
 # Docker
