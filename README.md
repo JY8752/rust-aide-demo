@@ -4,20 +4,23 @@
 cargo init --bin --name rust-aide-demo
 ```
 
-## cargo-make
+## mise
 
-Install:
+Install and trust the project:
 
 ```shell
-cargo install cargo-make
+mise trust
+mise install
 ```
 
 Examples:
 
 ```shell
-cargo make check
-cargo make test
-cargo make ci
-cargo make db-up
-cargo make db-migrate
+mise run check
+mise run test
+mise run ci
+mise run run
+mise run up
+mise run migrate-apply
+mise run migrate-diff add_users_table
 ```

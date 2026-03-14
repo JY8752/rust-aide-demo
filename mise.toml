@@ -1,0 +1,74 @@
+[env]
+POSTGRES_USER = "postgres"
+POSTGRES_PASSWORD = "pass"
+POSTGRES_DB = "app"
+POSTGRES_PORT = "5432"
+DATABASE_URL = "postgres://{{ env.POSTGRES_USER }}:{{ env.POSTGRES_PASSWORD }}@localhost:{{ env.POSTGRES_PORT }}/{{ env.POSTGRES_DB }}?sslmode=disable"
+RUST_LOG = "info"
+
+[tools]
+"cargo:cargo-watch" = "latest"
+"aqua:ariga/atlas" = "1.1.0"
+
+[tasks.fmt]
+description = "Format the workspace"
+run = "cargo fmt --all"
+
+[tasks.fmt-check]
+description = "Check formatting"
+run = "cargo fmt --all -- --check"
+
+[tasks.check]
+description = "Check the workspace"
+run = "cargo check --workspace"
+
+[tasks.clippy]
+description = "Lint the workspace"
+run = "cargo clippy --workspace --all-targets -- -D warnings"
+
+[tasks.test]
+description = "Run tests"
+run = "cargo test --workspace"
+
+[tasks.ci]
+description = "Run CI checks"
+depends = ["fmt-check", "check", "clippy", "test"]
+
+[tasks.serve]
+description = "Run the app once"
+run = "cargo run --bin app"
+
+[tasks.run]
+description = "Run the app with auto-restart on file changes"
+run = "cargo watch -x 'run --bin app'"
+
+########################################################
+# docker
+########################################################
+
+[tasks.up]
+description = "Start local services"
+run = "docker compose up -d"
+
+[tasks.down]
+description = "Stop local services"
+run = "docker compose down"
+
+[tasks.connect]
+description = "Connect to PostgreSQL"
+run = "docker compose exec postgres psql -U postgres -d app"
+
+########################################################
+# migrations
+########################################################
+
+[tasks.migrate-apply]
+description = "Apply the schema to the local database"
+run = "atlas schema apply --env local"
+
+[tasks.migrate-diff]
+description = "Create a migration from the schema diff"
+usage = '''
+arg "[name]" help="Migration name"
+'''
+run = "atlas migrate diff ${usage_name-} --env local"

@@ -1,5 +1,5 @@
-use app_state::AppState;
 use anyhow::Context;
+use app_state::AppState;
 use axum::{
     Router,
     routing::{get, post},
@@ -30,8 +30,7 @@ async fn main() -> anyhow::Result<()> {
 }
 
 fn init_tracing() {
-    let env_filter =
-        EnvFilter::try_from_default_env().unwrap_or_else(|_| EnvFilter::new("info"));
+    let env_filter = EnvFilter::try_from_default_env().unwrap_or_else(|_| EnvFilter::new("info"));
 
     let json_log = std::env::var("LOG_FORMAT")
         .map(|v| v.eq_ignore_ascii_case("json"))
