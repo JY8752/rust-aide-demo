@@ -1,4 +1,6 @@
 [env]
+_.source = "scripts/env.sh"
+
 POSTGRES_USER = "postgres"
 POSTGRES_PASSWORD = "pass"
 POSTGRES_DB = "app"
@@ -9,6 +11,7 @@ RUST_LOG = "info"
 [tools]
 "cargo:cargo-watch" = "latest"
 "aqua:ariga/atlas" = "1.1.0"
+"aqua:dotenvx/dotenvx" = "1.55.1"
 
 [tasks.fmt]
 description = "Format the workspace"
@@ -36,11 +39,11 @@ depends = ["fmt-check", "check", "clippy", "test"]
 
 [tasks.serve]
 description = "Run the app once"
-run = "cargo run --bin app"
+run = "dotenvx run -- cargo run --bin app"
 
 [tasks.run]
 description = "Run the app with auto-restart on file changes"
-run = "cargo watch -x 'run --bin app'"
+run = "dotenvx run -- cargo watch -x 'run --bin app'"
 
 ########################################################
 # docker

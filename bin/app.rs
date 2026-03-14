@@ -11,6 +11,8 @@ use tracing_subscriber::EnvFilter;
 async fn main() -> anyhow::Result<()> {
     init_tracing();
 
+    tracing::info!("{}", std::env::var("HELLO")?);
+
     let database_url = std::env::var("DATABASE_URL").context("DATABASE_URL is not set")?;
     let state = AppState::from_database_url(&database_url).await?;
 
