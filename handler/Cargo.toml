@@ -5,9 +5,11 @@ edition = "2024"
 
 [dependencies]
 app_state.workspace = true
+aide.workspace = true
 axum.workspace = true
 domain.workspace = true
 usecase.workspace = true
 uuid.workspace = true
 serde.workspace = true
+schemars.workspace = true
 tracing.workspace = true

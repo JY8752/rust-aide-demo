@@ -1,10 +1,6 @@
 use anyhow::Context;
 use app_state::AppState;
-use axum::{
-    Router,
-    routing::{get, post},
-};
-use handler::{hello, user};
+use handler::router;
 use tracing_subscriber::EnvFilter;
 
 #[tokio::main]
@@ -16,11 +12,7 @@ async fn main() -> anyhow::Result<()> {
     let database_url = std::env::var("DATABASE_URL").context("DATABASE_URL is not set")?;
     let state = AppState::from_database_url(&database_url).await?;
 
-    let app = Router::new()
-        .route("/hello", get(hello::hello))
-        .route("/users/{id}", get(user::get_user))
-        .route("/users", post(user::create_user))
-        .with_state(state);
+    let app = router(state);
 
     let listener = tokio::net::TcpListener::bind("127.0.0.1:3000").await?;
 
@@ -30,7 +22,6 @@ async fn main() -> anyhow::Result<()> {
     axum::serve(listener, app).await?;
     Ok(())
 }
-
 fn init_tracing() {
     let env_filter = EnvFilter::try_from_default_env().unwrap_or_else(|_| EnvFilter::new("info"));
 
