@@ -13,3 +13,8 @@ uuid.workspace = true
 serde.workspace = true
 schemars.workspace = true
 tracing.workspace = true
+
+[dev-dependencies]
+tokio.workspace = true
+tower = { version = "0.5", features = ["util"] }
+sqlx.workspace = true
