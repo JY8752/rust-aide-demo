@@ -23,11 +23,11 @@ pub struct GetUserPath {
     id: String,
 }
 
-#[derive(Serialize, JsonSchema)]
+#[derive(Debug, PartialEq, Eq, Serialize, JsonSchema, Deserialize)]
 pub struct UserResponse {
-    id: String,
-    name: String,
-    email: String,
+    pub id: String,
+    pub name: String,
+    pub email: String,
 }
 
 impl From<&domain::user::User> for UserResponse {

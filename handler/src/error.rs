@@ -1,11 +1,11 @@
 use axum::{Json, http::StatusCode, response::IntoResponse};
 use schemars::JsonSchema;
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use usecase::error::ApplicationError;
 
-#[derive(Serialize, JsonSchema)]
+#[derive(Debug, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 pub struct ErrorResponse {
-    message: &'static str,
+    pub message: String,
 }
 
 pub struct ApiError {
@@ -32,7 +32,7 @@ impl IntoResponse for ApiError {
         (
             self.status,
             Json(ErrorResponse {
-                message: self.message,
+                message: self.message.to_string(),
             }),
         )
             .into_response()

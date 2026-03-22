@@ -1,19 +1,12 @@
 mod helper;
 
-use axum::{
-    body::Body,
-    http::{Request, StatusCode},
-};
-use tower::ServiceExt;
+use axum::http::StatusCode;
 
 #[tokio::test]
 async fn test_hello() {
-    let app = helper::setup_router().await;
+    let test_app = helper::setup_app().await;
 
-    let response = app
-        .oneshot(Request::get("/hello").body(Body::empty()).unwrap())
-        .await
-        .unwrap();
+    let response = test_app.get("/hello").await;
 
     assert_eq!(response.status(), StatusCode::OK);
     helper::assert_text_response(response, "Hello, World!").await;
