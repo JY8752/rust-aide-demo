@@ -1,5 +1,9 @@
 # rust-aide-demo
 
+<https://zenn.dev/jy8752/scraps/4009abce743e9e>
+
+上記のZennスクラップの成果物。
+
 ```shell
 cargo init --bin --name rust-aide-demo
 ```
