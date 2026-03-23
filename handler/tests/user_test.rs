@@ -3,7 +3,10 @@ mod helper;
 use axum::http::StatusCode;
 use handler::error::ErrorResponse;
 use handler::user::UserResponse;
+use mockall::{mock, predicate};
 use serde::Serialize;
+use std::sync::Arc;
+use usecase::{error::ApplicationError, notify::Notifier};
 
 #[derive(Serialize)]
 struct CreateUserRequest {
@@ -11,9 +14,17 @@ struct CreateUserRequest {
     email: String,
 }
 
+mock! {
+    Notifier {}
+
+    impl Notifier for Notifier {
+        fn notify(&self, message: &str) -> Result<(), ApplicationError>;
+    }
+}
+
 #[tokio::test]
 async fn test_create_user() {
-    let test_app = helper::setup_app().await;
+    let test_app = helper::setup_app(helper::SetupAppOptions::default()).await;
     let request = CreateUserRequest {
         name: "Alice".to_string(),
         email: "alice@example.com".to_string(),
@@ -27,9 +38,34 @@ async fn test_create_user() {
 }
 
 #[tokio::test]
+async fn test_create_user_notifies_on_success() {
+    // Arrange
+    let mut notifier = MockNotifier::new();
+    notifier
+        .expect_notify()
+        .with(predicate::str::contains("alice@example.com"))
+        .times(1)
+        .returning(|_| Ok(()));
+
+    let test_app =
+        helper::setup_app(helper::SetupAppOptions::default().with_notifier(Arc::new(notifier)))
+            .await;
+    let request = CreateUserRequest {
+        name: "Alice".to_string(),
+        email: "alice@example.com".to_string(),
+    };
+
+    // Act
+    let response = test_app.post_json("/users", &request).await;
+
+    // Assert
+    assert_eq!(response.status(), StatusCode::CREATED);
+}
+
+#[tokio::test]
 async fn test_get_user() {
     // Arrange
-    let test_app = helper::setup_app().await;
+    let test_app = helper::setup_app(helper::SetupAppOptions::default()).await;
     let request = CreateUserRequest {
         name: "Alice".to_string(),
         email: "alice@example.com".to_string(),
@@ -58,7 +94,12 @@ async fn test_get_user() {
 
 #[tokio::test]
 async fn test_create_user_returns_bad_request_for_invalid_email() {
-    let test_app = helper::setup_app().await;
+    let mut notifier = MockNotifier::new();
+    notifier.expect_notify().times(0);
+
+    let test_app =
+        helper::setup_app(helper::SetupAppOptions::default().with_notifier(Arc::new(notifier)))
+            .await;
     let request = CreateUserRequest {
         name: "Alice".to_string(),
         email: "invalid-email".to_string(),

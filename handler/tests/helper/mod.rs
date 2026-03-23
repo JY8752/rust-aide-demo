@@ -1,5 +1,7 @@
 #![allow(dead_code)]
 
+use std::sync::Arc;
+
 use app_state::AppState;
 use axum::{
     Router,
@@ -7,7 +9,9 @@ use axum::{
     http::Request,
     response::Response,
 };
+use domain::user::repository::UserRepository as UserRepositoryPort;
 use handler::{error::ErrorResponse, user::UserResponse};
+use infrastructure::{db::user::UserRepository, slack::SlackClient};
 use serde::{Serialize, de::DeserializeOwned};
 use sqlx::PgPool;
 use testcontainers_modules::{
@@ -15,11 +19,33 @@ use testcontainers_modules::{
     testcontainers::{core::ContainerAsync, runners::AsyncRunner},
 };
 use tower::ServiceExt;
+use usecase::{notify::Notifier, user::UserUseCase};
 use uuid::Uuid;
 
 pub struct TestApp {
     pub app: Router,
     _postgres: ContainerAsync<Postgres>,
+}
+
+pub struct SetupAppOptions {
+    notifier: Arc<dyn Notifier + Send + Sync>,
+}
+
+impl Default for SetupAppOptions {
+    fn default() -> Self {
+        Self {
+            notifier: Arc::new(SlackClient::new(
+                std::env::var("SLACK_WEBHOOK_URL").unwrap_or_default(),
+            )),
+        }
+    }
+}
+
+impl SetupAppOptions {
+    pub fn with_notifier(mut self, notifier: Arc<dyn Notifier + Send + Sync>) -> Self {
+        self.notifier = notifier;
+        self
+    }
 }
 
 impl TestApp {
@@ -48,7 +74,7 @@ impl TestApp {
     }
 }
 
-pub async fn setup_app() -> TestApp {
+pub async fn setup_app(options: SetupAppOptions) -> TestApp {
     let postgres = Postgres::default()
         .with_db_name("app")
         .with_user("postgres")
@@ -61,9 +87,13 @@ pub async fn setup_app() -> TestApp {
     let host = postgres.get_host().await.unwrap();
     let port = postgres.get_host_port_ipv4(5432).await.unwrap();
     let database_url = format!("postgres://postgres:pass@{host}:{port}/app?sslmode=disable");
-
     let pool = PgPool::connect(&database_url).await.unwrap();
-    let state = AppState::from_pool(pool);
+
+    let user_repository: Arc<dyn UserRepositoryPort + Send + Sync> =
+        Arc::new(UserRepository::new(pool));
+    let user_usecase = UserUseCase::new(user_repository, options.notifier);
+
+    let state = AppState::new(user_usecase);
 
     TestApp {
         app: handler::router(state),
@@ -84,7 +114,11 @@ where
     serde_json::from_slice(&body).unwrap()
 }
 
-pub fn assert_created_user_response(user: &UserResponse, expected_name: &str, expected_email: &str) {
+pub fn assert_created_user_response(
+    user: &UserResponse,
+    expected_name: &str,
+    expected_email: &str,
+) {
     assert!(Uuid::parse_str(&user.id).is_ok());
 
     let expected = UserResponse {

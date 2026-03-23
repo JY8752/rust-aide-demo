@@ -20,3 +20,5 @@ tower.workspace = true
 sqlx.workspace = true
 serde_json.workspace = true
 testcontainers-modules.workspace = true
+mockall.workspace = true
+infrastructure.workspace = true

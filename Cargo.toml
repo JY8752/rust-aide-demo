@@ -36,6 +36,7 @@ aide = { version = "0.16.0-alpha.2", features = ["axum", "axum-json", "swagger"]
 schemars = "1.0.4"
 tower = { version = "0.5", features = ["util"] }
 testcontainers-modules = { version = "0.15.0", features = ["postgres"] }
+mockall = "0.14.0"
 
 [dependencies]
 app_state.workspace = true

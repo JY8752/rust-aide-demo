@@ -2,9 +2,9 @@ use std::sync::Arc;
 
 use anyhow::Context;
 use domain::user::repository::UserRepository as UserRepositoryPort;
-use infrastructure::db::user::UserRepository;
+use infrastructure::{db::user::UserRepository, slack::SlackClient};
 use sqlx::PgPool;
-use usecase::user::UserUseCase;
+use usecase::{notify::Notifier, user::UserUseCase};
 
 #[derive(Clone)]
 pub struct AppState {
@@ -21,7 +21,10 @@ impl AppState {
     pub fn from_pool(pool: PgPool) -> Self {
         let user_repository: Arc<dyn UserRepositoryPort + Send + Sync> =
             Arc::new(UserRepository::new(pool));
-        let user_usecase = UserUseCase::new(user_repository);
+        let notifier: Arc<dyn Notifier + Send + Sync> = Arc::new(SlackClient::new(
+            std::env::var("SLACK_WEBHOOK_URL").unwrap_or_default(),
+        ));
+        let user_usecase = UserUseCase::new(user_repository, notifier);
 
         Self::new(user_usecase)
     }
